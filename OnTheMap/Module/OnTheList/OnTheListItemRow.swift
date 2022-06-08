@@ -16,7 +16,7 @@ struct OnTheListItemRow: View {
     VStack(alignment: .leading, spacing: 10.0) {
 
       HStack {
-        Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "" )")
+        Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "")")
         .font(.title)
         .bold()
         Spacer()
@@ -32,21 +32,4 @@ struct OnTheListItemRow: View {
     .cornerRadius(10)
   }
 
-}
-
-struct OnTheListItemRow_Previews: PreviewProvider {
-  static var previews: some View {
-    OnTheListItemRow(studentLocation: StudentLocationModel(
-      firstName: "John Emi",
-      lastName: "Doe",
-      longitude: -122.083851,
-      latitude: 37.386052,
-      mapString: "Mountain View, CA",
-      mediaURL: "https://udacity.com",
-      uniqueKey: "654376",
-      objectId: "ID10",
-      createdAt: "2019-05-17T00:53:33.941Z",
-      updatedAt: "2022-05-20T04:20:49.505Z")
-    )
-  }
 }

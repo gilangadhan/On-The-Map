@@ -17,6 +17,4 @@ struct TabItem: View {
       Text(title)
     }
   }
-
 }
-

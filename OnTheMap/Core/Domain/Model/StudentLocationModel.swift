@@ -6,17 +6,16 @@
 //
 
 import Foundation
+import MapKit
 
-struct StudentLocationModel: Decodable {
-
+struct StudentLocationModel: Identifiable {
+  let id: String?
   let firstName: String?
   let lastName: String?
-  let longitude: Double?
-  let latitude: Double?
+  let coordinate: CLLocationCoordinate2D
   let mapString: String?
   let mediaURL: String?
   let uniqueKey: String?
-  let objectId: String?
   let createdAt: String?
   let updatedAt: String?
 

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MapKit
 
 final class StudentLocationMapper {
 
@@ -13,15 +14,15 @@ final class StudentLocationMapper {
     input categoryResponses: [StudentLocationResponse]
   ) -> [StudentLocationModel] {
     return categoryResponses.map { result in
+
       return StudentLocationModel(
+        id: result.objectId,
         firstName: result.firstName,
         lastName: result.lastName,
-        longitude: result.longitude,
-        latitude: result.latitude,
+        coordinate: CLLocationCoordinate2D(latitude: result.latitude!, longitude: result.longitude!),
         mapString: result.mapString,
         mediaURL: result.mediaURL,
         uniqueKey: result.uniqueKey,
-        objectId: result.objectId,
         createdAt: result.createdAt,
         updatedAt: result.updatedAt
       )

@@ -26,9 +26,8 @@ struct OnTheListView: View {
       if self.viewModel.studentLocations.count == 0 {
         self.viewModel.getStudentLocations()
       }
-    }.navigationBarTitle(
-      Text("On The Map Apps"),
-      displayMode: .automatic
+    }.navigationTitle(
+      Text("List Student Location")
     )
   }
 }

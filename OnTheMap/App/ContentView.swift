@@ -11,7 +11,7 @@ struct ContentView: View {
   var body: some View {
     NavigationView {
       TabView {
-        OnTheListRouter().showView()
+        OnTheMapRouter().showView()
           .tabItem {
             Label("Map", systemImage: "globe.asia.australia")
           }
