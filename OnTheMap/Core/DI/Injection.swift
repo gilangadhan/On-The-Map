@@ -8,9 +8,13 @@
 import Foundation
 
 final class Injection: NSObject {
+  func provideSession() -> OnTheMapSession {
+    return OnTheMapSession.sharedInstance
+  }
 
   private func provideRepository() -> OnTheMapRepositoryProtocol {
-    let remote: RemoteDataSource = RemoteDataSource.sharedInstance
+    let session = provideSession()
+    let remote: RemoteDataSource = RemoteDataSource.sharedInstance(session)
     return OnTheMapRepository.sharedInstance(remote)
   }
 
@@ -19,4 +23,13 @@ final class Injection: NSObject {
     return GetStudentLocationsInteractor(repository: repository)
   }
 
+  func provideLogin() -> LoginUsecase {
+    let repository = provideRepository()
+    return LoginInteractor(repository: repository)
+  }
+
+  func provideHomePage() -> HomePageUseCase {
+    let repository = provideRepository()
+    return HomePageInteractor(repository: repository)
+  }
 }

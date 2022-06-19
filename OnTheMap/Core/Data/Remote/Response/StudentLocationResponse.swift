@@ -8,13 +8,13 @@
 import Foundation
 
 struct StudentLocationResponses: Decodable {
-
+  
   let results: [StudentLocationResponse]
-
+  
 }
 
 struct StudentLocationResponse: Decodable {
-
+  
   let firstName: String?
   let lastName: String?
   let longitude: Double?
@@ -25,5 +25,5 @@ struct StudentLocationResponse: Decodable {
   let objectId: String?
   let createdAt: String?
   let updatedAt: String?
-
+  
 }

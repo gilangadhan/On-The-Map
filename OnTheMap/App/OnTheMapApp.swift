@@ -9,10 +9,10 @@ import SwiftUI
 
 @main
 struct OnTheMapApp: App {
-
+  
   var body: some Scene {
     WindowGroup {
-      ContentView()
+      ContentViewRouter().showView()
     }
   }
 }

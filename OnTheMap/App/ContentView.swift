@@ -8,24 +8,26 @@
 import SwiftUI
 
 struct ContentView: View {
+  @ObservedObject var session: OnTheMapSession
+
   var body: some View {
     NavigationView {
-      TabView {
-        OnTheMapRouter().showView()
-          .tabItem {
-            Label("Map", systemImage: "globe.asia.australia")
-          }
-        OnTheListRouter().showView()
-          .tabItem {
-            Label("List", systemImage: "list.dash")
-          }
+      VStack {
+        if session.stateLogin {
+          HomePageRouter().showView().transition(.opacity)
+        } else {
+          LoginRouter().showView().transition(.opacity)
+        }
       }
     }
   }
 }
 
-struct ContentView_Previews: PreviewProvider {
-  static var previews: some View {
-    ContentView()
+class ContentViewRouter {
+
+  func showView() -> some View {
+    let session = Injection.init().provideSession()
+    return ContentView(session: session)
   }
+
 }

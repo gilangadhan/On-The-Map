@@ -21,12 +21,15 @@ protocol Endpoint {
 
 enum Endpoints {
 
-  enum Gets: Endpoint {
+  enum Request: Endpoint {
     case studentLocation
+    case session
 
     public var url: String {
       switch self {
       case .studentLocation: return "\(API.baseUrl)StudentLocation?limit=100&order=-updatedAt"
+      case .session: return "\(API.baseUrl)session"
+
       }
     }
   }
