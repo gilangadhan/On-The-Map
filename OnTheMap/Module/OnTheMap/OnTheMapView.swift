@@ -9,11 +9,12 @@ import SwiftUI
 import MapKit
 
 struct OnTheMapView: View {
-
+  @State var isShowMap: Bool = false
+  @State var outSiteClick: Bool = false
   @ObservedObject var viewModel: OnTheMapViewModel
 
   @State private var region = MKCoordinateRegion(
-    center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275),
+    center: CLLocationCoordinate2D(latitude: -6.9034495, longitude: 107.6431575),
     span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
   )
 
@@ -69,19 +70,34 @@ extension OnTheMapView {
     ) { studentLocation in
       MapAnnotation(coordinate: studentLocation.coordinate) {
         VStack {
-          Group {
-            Image(systemName: "mappin.circle.fill")
-              .resizable()
-              .frame(width: 30.0, height: 30.0)
-            Circle()
-              .frame(width: 8.0, height: 8.0)
-            }.foregroundColor(.red)
-          Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "")")
-        }.onTapGesture {
-          print(studentLocation.mapString!)
+          if let url = URL(string: studentLocation.mediaURL ?? "dicoding.com") {
+            Link(destination: url) {
+              VStack {
+                Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "")")
+                Text("\(studentLocation.mediaURL ?? "")")
+              }.background(Color.white)
+                .opacity(isShowMap ? 1 : 0)
+            }
+          } else {
+            VStack {
+              Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "")")
+              Text("\(studentLocation.mediaURL ?? "URL Invalid")")
+            }.background(Color.white)
+              .opacity(isShowMap ? 1 : 0)
+          }
+          Button(action: {
+            isShowMap = !isShowMap
+          }, label: {
+            VStack {
+              Image(systemName: "mappin.circle.fill")
+                .resizable()
+                .frame(width: 30.0, height: 30.0)
+              Circle()
+                .frame(width: 8.0, height: 8.0)
+            }
+          }).foregroundColor(.red)
         }
       }
     }
   }
-
 }

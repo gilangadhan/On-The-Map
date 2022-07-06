@@ -13,9 +13,10 @@ import SwiftUI
 protocol RemoteDataSourceProtocol: AnyObject {
 
   func getStudentLocations() -> AnyPublisher<[StudentLocationResponse], Error>
+  func findLocation(by location: String) -> AnyPublisher<DataLocationResponse, Error>
   func postSession(username: String, password: String) -> AnyPublisher<Bool, Error>
   func deleteSession() -> AnyPublisher<Bool, Error>
-
+  func addLocation(from locationRequest: LocationRequest) -> AnyPublisher<Bool, Error>
 }
 
 final class RemoteDataSource: NSObject {
@@ -32,11 +33,33 @@ final class RemoteDataSource: NSObject {
 }
 
 extension RemoteDataSource: RemoteDataSourceProtocol {
+  func findLocation(by location: String) -> AnyPublisher<DataLocationResponse, Error> {
+    let newLocation = location.replacingOccurrences(of: " ", with: "%20")
+    return Future<DataLocationResponse, Error> { completion in
+      if let url = URL(string: "\(Endpoints.Request.location.url)\(newLocation)") {
+        AF.request(url)
+          .validate()
+          .responseDecodable(of: LocationResponse.self) { response in
+            switch response.result {
+            case .success(let value):
+              print(value)
+              if value.data.count > 0, value.data[0].latitude != nil, value.data[0].longitude != nil {
+                  completion(.success(value.data[0]))
+              } else {
+                completion(.failure(URLError.invalidResponse))
+              }
+            case .failure:
+              completion(.failure(URLError.invalidResponse))
+            }
+          }
+      }
+    }.eraseToAnyPublisher()
+  }
 
   func getStudentLocations() -> AnyPublisher<[StudentLocationResponse], Error> {
 
     return Future<[StudentLocationResponse], Error> { completion in
-      if let url = URL(string: Endpoints.Request.studentLocation.url) {
+      if let url = URL(string: Endpoints.Request.getStudentLocation.url) {
         AF.request(url)
           .validate()
           .responseDecodable(of: StudentLocationResponses.self) { response in
@@ -69,12 +92,36 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
           let range = 5..<data.count
           let newData = data.subdata(in: range)
           let decoder = JSONDecoder()
-          print(data)
           do {
             let result = try decoder.decode(LoginResponses.self, from: newData)
-            self.session.stateLogin = true
-            self.session.userKey = result.account.key
-            completion(.success(true))
+            let urlGetUser = URL(string: "\(Endpoints.Request.user.url)\(result.account.key)")
+
+            let newTask = URLSession.shared.dataTask(with: URLRequest(url: urlGetUser!)) { maybeData, maybeResponse, maybeError in
+              if maybeError != nil {
+                completion(.failure(URLError.addressUnreachable(urlGetUser!)))
+              } else if let data = maybeData, let response = maybeResponse as? HTTPURLResponse, response.statusCode == 200 {
+
+                let range = 5..<data.count
+                let newData = data.subdata(in: range)
+                let decoder = JSONDecoder()
+                do {
+                  let result = try decoder.decode(UserResponse.self, from: newData)
+
+                  self.session.stateLogin = true
+                  self.session.userKey = result.key
+                  self.session.firstName = result.firstName
+                  self.session.lastName = result.lastName
+
+                  completion(.success(true))
+                } catch {
+                  completion(.failure(URLError.invalidResponse))
+                }
+              } else {
+                completion(.failure(URLError.invalidResponse))
+              }
+            }
+            newTask.resume()
+
           } catch {
             completion(.failure(URLError.invalidResponse))
           }
@@ -83,7 +130,47 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
         }
       }
       task.resume()
-    }.eraseToAnyPublisher()
+    }.receive(on: RunLoop.main)
+      .eraseToAnyPublisher()
+  }
+
+  func addLocation(from locationRequest: LocationRequest) -> AnyPublisher<Bool, Error> {
+    return Future<Bool, Error> { completion in
+      let url = URL(string: Endpoints.Request.addStudentLocation.url)
+      var request = URLRequest(url: url!)
+
+      request.httpMethod = "POST"
+      request.addValue("application/json", forHTTPHeaderField: "Accept")
+      request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+      request.httpBody = "{\"uniqueKey\": \"\(self.session.userKey)\", \"firstName\": \"\(self.session.firstName)\", \"lastName\": \"\(self.session.lastName)\",\"mapString\": \"\(locationRequest.mapString)\", \"mediaURL\": \"\(locationRequest.mediaURL)\",\"latitude\": \(locationRequest.latitude), \"longitude\": \(locationRequest.longitude)}".data(using: .utf8)
+
+      print(self.session.userKey)
+
+      let task = URLSession.shared.dataTask(with: request) { maybeData, maybeResponse, maybeError in
+        if maybeError != nil {
+          completion(.failure(URLError.addressUnreachable(url!)))
+        } else if let data = maybeData, let response = maybeResponse as? HTTPURLResponse, response.statusCode == 200 {
+
+          let decoder = JSONDecoder()
+          do {
+            let result = try decoder.decode(AddLocationResponses.self, from: data)
+            print(result)
+            if !result.objectID.isEmpty {
+              completion(.success(true))
+            } else {
+              print(result)
+            }
+          } catch {
+            completion(.failure(URLError.invalidResponse))
+          }
+        } else {
+          completion(.failure(URLError.invalidResponse))
+        }
+      }
+      task.resume()
+    }
+      .eraseToAnyPublisher()
   }
 
   func deleteSession() -> AnyPublisher<Bool, Error> {
@@ -109,7 +196,6 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
           let range = 5..<data.count
           let newData = data.subdata(in: range)
           let decoder = JSONDecoder()
-          print(String(data: newData, encoding: .utf8)!)
           do {
             _ = try decoder.decode(LogoutResponses.self, from: newData)
             self.session.stateLogin = false
@@ -123,6 +209,7 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
         }
       }
       task.resume()
-    }.eraseToAnyPublisher()
+    }.receive(on: RunLoop.main)
+      .eraseToAnyPublisher()
   }
 }

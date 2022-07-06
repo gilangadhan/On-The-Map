@@ -40,10 +40,13 @@ struct HomePageView: View {
         }, label: {
           Image(systemName: "arrow.clockwise")
         })
-        
-        Button(action: {}, label: {
+
+        NavigationLink {
+          FindLocationRouter().showView()
+        } label: {
           Image(systemName: "plus")
-        })
+        }
+
       }
       ToolbarItem(placement: .navigationBarLeading) {
         Button("Logout") {

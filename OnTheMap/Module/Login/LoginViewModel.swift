@@ -50,6 +50,7 @@ class LoginViewModel: ObservableObject {
     } else {
       errorMessage = "Please Check Username and Password!"
       showingAlert = true
+      isLoading = false
     }
   }
 }

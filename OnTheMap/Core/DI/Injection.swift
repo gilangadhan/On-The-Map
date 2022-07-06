@@ -32,4 +32,14 @@ final class Injection: NSObject {
     let repository = provideRepository()
     return HomePageInteractor(repository: repository)
   }
+
+  func provideFindLocation() -> FindLocationUseCase {
+    let repository = provideRepository()
+    return FindLocationInteractor(repository: repository)
+  }
+
+  func provideAddLocation() -> AddLocationUseCase {
+    let repository = provideRepository()
+    return AddLocationInteractor(repository: repository)
+  }
 }

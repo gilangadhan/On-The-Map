@@ -10,6 +10,8 @@ import Foundation
 struct API {
 
   static let baseUrl = "https://onthemap-api.udacity.com/v1/"
+  static let mapBaseUrl = "http://api.positionstack.com/v1/forward"
+  static let APIKey = "2cdecf0e65ed01715a86afe12d352f33"
 
 }
 
@@ -22,14 +24,19 @@ protocol Endpoint {
 enum Endpoints {
 
   enum Request: Endpoint {
-    case studentLocation
+    case getStudentLocation
+    case addStudentLocation
     case session
+    case location
+    case user
 
     public var url: String {
       switch self {
-      case .studentLocation: return "\(API.baseUrl)StudentLocation?limit=100&order=-updatedAt"
+      case .getStudentLocation: return "\(API.baseUrl)StudentLocation?limit=100&order=-updatedAt"
+      case .addStudentLocation: return "\(API.baseUrl)StudentLocation"
       case .session: return "\(API.baseUrl)session"
-
+      case .location: return "\(API.mapBaseUrl)?access_key=\(API.APIKey)&limit=1&output=json&query="
+      case .user: return "\(API.baseUrl)users/"
       }
     }
   }
