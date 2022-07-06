@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct StudentLocationResponses: Decodable {
+struct StudentLocationResponses: Codable {
   
   let results: [StudentLocationResponse]
   
 }
 
-struct StudentLocationResponse: Decodable {
+struct StudentLocationResponse: Codable {
   
   let firstName: String?
   let lastName: String?

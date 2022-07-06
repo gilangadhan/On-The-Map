@@ -11,7 +11,7 @@ class OnTheMapRouter {
 
   func showView() -> some View {
     let usecase = Injection.init().provideGetStudentLocations()
-    let viewModel = OnTheMapViewModel(usecase)
+    let viewModel = OnTheListViewModel(usecase)
     return OnTheMapView(viewModel: viewModel)
   }
 

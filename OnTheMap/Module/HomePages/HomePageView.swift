@@ -12,6 +12,7 @@ struct HomePageView: View {
   @ObservedObject var viewModel: HomePageViewModel
   @State var selection = 0
   @State var isReloading = false
+  @State var isBackToHome = false
 
   var body: some View {
     TabView(selection: $selection) {
@@ -29,7 +30,8 @@ struct HomePageView: View {
         .onAppear() {
           self.selection = 1
         }
-    }.toolbar {
+    }.navigationBarBackButtonHidden(true)
+      .toolbar {
       ToolbarItemGroup(placement: .navigationBarTrailing) {
         Button(action: {
           if selection == 0 {

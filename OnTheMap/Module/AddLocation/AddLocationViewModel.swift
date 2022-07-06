@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 class AddLocationViewModel: ObservableObject {
   private var cancellables: Set<AnyCancellable> = []
@@ -33,6 +34,7 @@ class AddLocationViewModel: ObservableObject {
           self.isSuccess = false
           self.errorMessage = error.localizedDescription
           self.showingAlert = true
+          self.isLoading = false
         case .finished:
           self.isLoading = false
         }
@@ -40,7 +42,7 @@ class AddLocationViewModel: ObservableObject {
         if result {
           self.isSuccess = true
         } else {
-          self.errorMessage = String(describing: "Failed to Add Data!")
+          self.errorMessage = "Failed to Add Data!"
           self.showingAlert = true
         }
       })

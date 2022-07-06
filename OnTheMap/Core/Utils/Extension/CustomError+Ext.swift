@@ -10,12 +10,18 @@ import Foundation
 enum URLError: LocalizedError {
 
   case invalidResponse
+  case noInternet
+  case logoutFailed
   case addressUnreachable(URL)
+  case credentialIncorrect
 
   var errorDescription: String? {
     switch self {
     case .invalidResponse: return "The server responded with garbage."
     case .addressUnreachable(let url): return "\(url.absoluteString) is unreachable."
+    case .logoutFailed: return "Can't remove cache from login."
+    case .noInternet: return "The Internet connection is offline, please try again later."
+    case .credentialIncorrect: return "The credentials were incorrect, please check your email or/and your password."
     }
   }
 

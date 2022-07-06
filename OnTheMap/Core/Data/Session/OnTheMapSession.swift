@@ -48,7 +48,7 @@ final class OnTheMapSession: ObservableObject {
     }
   }
 
-  static func deteleAll() -> Bool {
+  func deteleAll() -> Bool {
     if let domain = Bundle.main.bundleIdentifier {
       UserDefaults.standard.removePersistentDomain(forName: domain)
       synchronize()
@@ -56,7 +56,7 @@ final class OnTheMapSession: ObservableObject {
     } else { return false }
   }
   
-  static func synchronize() {
+  func synchronize() {
     UserDefaults.standard.synchronize()
   }
 }

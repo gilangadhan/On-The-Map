@@ -45,14 +45,14 @@ extension OnTheListView {
       CustomEmptyView(
           image: "assetSearchNotFound",
           title: viewModel.errorMessage
-      ).offset(y: 80)
+      )
   }
 
   var emptyStudentLocations: some View {
       CustomEmptyView(
           image: "assetNoFavorite",
           title: "The student location is empty"
-      ).offset(y: 80)
+      )
   }
 
   var content: some View {

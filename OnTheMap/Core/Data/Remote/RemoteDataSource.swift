@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Alamofire
 import Combine
 import SwiftUI
 
@@ -37,21 +36,27 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
     let newLocation = location.replacingOccurrences(of: " ", with: "%20")
     return Future<DataLocationResponse, Error> { completion in
       if let url = URL(string: "\(Endpoints.Request.location.url)\(newLocation)") {
-        AF.request(url)
-          .validate()
-          .responseDecodable(of: LocationResponse.self) { response in
-            switch response.result {
-            case .success(let value):
-              print(value)
-              if value.data.count > 0, value.data[0].latitude != nil, value.data[0].longitude != nil {
-                  completion(.success(value.data[0]))
+        let request = URLRequest(url: url)
+        let task = URLSession.shared.dataTask(with: request) { maybeData, maybeResponse, maybeError in
+          if maybeError != nil {
+            completion(.failure(URLError.addressUnreachable(url)))
+          } else if let data = maybeData, let response = maybeResponse as? HTTPURLResponse, response.statusCode == 200 {
+            let decoder = JSONDecoder()
+            do {
+              let result = try decoder.decode(LocationResponse.self, from: data)
+              if result.data.count > 0, result.data[0].latitude != nil, result.data[0].longitude != nil {
+                  completion(.success(result.data[0]))
               } else {
                 completion(.failure(URLError.invalidResponse))
               }
-            case .failure:
+            } catch {
               completion(.failure(URLError.invalidResponse))
             }
+          } else {
+            completion(.failure(URLError.invalidResponse))
           }
+        }
+        task.resume()
       }
     }.eraseToAnyPublisher()
   }
@@ -60,16 +65,23 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
 
     return Future<[StudentLocationResponse], Error> { completion in
       if let url = URL(string: Endpoints.Request.getStudentLocation.url) {
-        AF.request(url)
-          .validate()
-          .responseDecodable(of: StudentLocationResponses.self) { response in
-            switch response.result {
-            case .success(let value):
-              completion(.success(value.results))
-            case .failure:
+        let request = URLRequest(url: url)
+        let task = URLSession.shared.dataTask(with: request) { maybeData, maybeResponse, maybeError in
+          if maybeError != nil {
+            completion(.failure(URLError.addressUnreachable(url)))
+          } else if let data = maybeData, let response = maybeResponse as? HTTPURLResponse, response.statusCode == 200 {
+            let decoder = JSONDecoder()
+            do {
+              let result = try decoder.decode(StudentLocationResponses.self, from: data)
+              completion(.success(result.results))
+            } catch {
               completion(.failure(URLError.invalidResponse))
             }
+          } else {
+            completion(.failure(URLError.invalidResponse))
           }
+        }
+        task.resume()
       }
     }.eraseToAnyPublisher()
   }
@@ -107,12 +119,13 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
                 do {
                   let result = try decoder.decode(UserResponse.self, from: newData)
 
-                  self.session.stateLogin = true
-                  self.session.userKey = result.key
-                  self.session.firstName = result.firstName
-                  self.session.lastName = result.lastName
-
-                  completion(.success(true))
+                  DispatchQueue.main.async {
+                    self.session.stateLogin = true
+                    self.session.userKey = result.key
+                    self.session.firstName = result.firstName
+                    self.session.lastName = result.lastName
+                    completion(.success(true))
+                  }
                 } catch {
                   completion(.failure(URLError.invalidResponse))
                 }
@@ -126,7 +139,7 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
             completion(.failure(URLError.invalidResponse))
           }
         } else {
-          completion(.failure(URLError.invalidResponse))
+          completion(.failure(URLError.credentialIncorrect))
         }
       }
       task.resume()
@@ -144,9 +157,6 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
       request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
       request.httpBody = "{\"uniqueKey\": \"\(self.session.userKey)\", \"firstName\": \"\(self.session.firstName)\", \"lastName\": \"\(self.session.lastName)\",\"mapString\": \"\(locationRequest.mapString)\", \"mediaURL\": \"\(locationRequest.mediaURL)\",\"latitude\": \(locationRequest.latitude), \"longitude\": \(locationRequest.longitude)}".data(using: .utf8)
-
-      print(self.session.userKey)
-
       let task = URLSession.shared.dataTask(with: request) { maybeData, maybeResponse, maybeError in
         if maybeError != nil {
           completion(.failure(URLError.addressUnreachable(url!)))
@@ -155,11 +165,10 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
           let decoder = JSONDecoder()
           do {
             let result = try decoder.decode(AddLocationResponses.self, from: data)
-            print(result)
             if !result.objectID.isEmpty {
               completion(.success(true))
             } else {
-              print(result)
+              completion(.failure(URLError.invalidResponse))
             }
           } catch {
             completion(.failure(URLError.invalidResponse))
@@ -198,9 +207,9 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
           let decoder = JSONDecoder()
           do {
             _ = try decoder.decode(LogoutResponses.self, from: newData)
-            self.session.stateLogin = false
-            self.session.userKey = ""
-            completion(.success(true))
+            DispatchQueue.main.async {
+                completion(self.session.deteleAll() ? .success(true) : .failure(URLError.logoutFailed))
+            }
           } catch {
             completion(.failure(URLError.invalidResponse))
           }

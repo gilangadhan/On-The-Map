@@ -11,7 +11,7 @@ import MapKit
 struct OnTheMapView: View {
   @State var isShowMap: Bool = false
   @State var outSiteClick: Bool = false
-  @ObservedObject var viewModel: OnTheMapViewModel
+  @ObservedObject var viewModel: OnTheListViewModel
 
   @State private var region = MKCoordinateRegion(
     center: CLLocationCoordinate2D(latitude: -6.9034495, longitude: 107.6431575),
@@ -52,14 +52,14 @@ extension OnTheMapView {
     CustomEmptyView(
       image: "assetSearchNotFound",
       title: viewModel.errorMessage
-    ).offset(y: 80)
+    )
   }
 
   var emptyStudentLocations: some View {
     CustomEmptyView(
       image: "assetNoFavorite",
       title: "The student location is empty"
-    ).offset(y: 80)
+    )
   }
 
   var content: some View {
@@ -68,12 +68,13 @@ extension OnTheMapView {
       showsUserLocation: true,
       annotationItems: viewModel.studentLocations
     ) { studentLocation in
-      MapAnnotation(coordinate: studentLocation.coordinate) {
+      MapAnnotation(coordinate: studentLocation.getCoordinate()) {
         VStack {
           if let url = URL(string: studentLocation.mediaURL ?? "dicoding.com") {
             Link(destination: url) {
               VStack {
                 Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "")")
+                Text("\(studentLocation.mapString ?? "")")
                 Text("\(studentLocation.mediaURL ?? "")")
               }.background(Color.white)
                 .opacity(isShowMap ? 1 : 0)
@@ -81,6 +82,7 @@ extension OnTheMapView {
           } else {
             VStack {
               Text("\(studentLocation.firstName ?? "") \(studentLocation.lastName ?? "")")
+              Text("\(studentLocation.mapString ?? "")")
               Text("\(studentLocation.mediaURL ?? "URL Invalid")")
             }.background(Color.white)
               .opacity(isShowMap ? 1 : 0)

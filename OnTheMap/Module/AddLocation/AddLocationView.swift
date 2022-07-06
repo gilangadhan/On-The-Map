@@ -10,8 +10,6 @@ import SwiftUI
 import MapKit
 
 struct AddLocationView: View {
-  @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-
   @ObservedObject var viewModel: AddLocationViewModel
   @State private var region = MKCoordinateRegion()
 
@@ -68,7 +66,6 @@ struct AddLocationView: View {
       center: beforeLocation,
       span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
     )
-    print(viewModel.location)
   }
 }
 

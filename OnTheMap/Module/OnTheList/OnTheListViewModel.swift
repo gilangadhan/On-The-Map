@@ -28,9 +28,10 @@ class OnTheListViewModel: ObservableObject {
       .receive(on: RunLoop.main)
       .sink(receiveCompletion: { completion in
           switch completion {
-          case .failure:
+          case .failure(let message):
             self.isError = true
-            self.errorMessage = String(describing: completion)
+            self.errorMessage = message.localizedDescription
+            self.isLoading = false
           case .finished:
             self.isLoading = false
           }

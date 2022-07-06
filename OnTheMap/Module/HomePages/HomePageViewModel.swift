@@ -32,6 +32,7 @@ class HomePageViewModel: ObservableObject {
           self.isSuccess = false
           self.errorMessage = error.localizedDescription
           self.showingAlert = true
+          self.isLoading = false
         case .finished:
           self.isLoading = false
         }
