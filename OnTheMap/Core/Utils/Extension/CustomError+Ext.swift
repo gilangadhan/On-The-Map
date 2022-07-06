@@ -14,6 +14,7 @@ enum URLError: LocalizedError {
   case logoutFailed
   case addressUnreachable(URL)
   case credentialIncorrect
+  case invalidInput
 
   var errorDescription: String? {
     switch self {
@@ -22,6 +23,7 @@ enum URLError: LocalizedError {
     case .logoutFailed: return "Can't remove cache from login."
     case .noInternet: return "The Internet connection is offline, please try again later."
     case .credentialIncorrect: return "The credentials were incorrect, please check your email or/and your password."
+    case .invalidInput: return "Please not use special character."
     }
   }
 

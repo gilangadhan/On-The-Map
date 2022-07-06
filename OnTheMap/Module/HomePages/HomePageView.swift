@@ -30,7 +30,7 @@ struct HomePageView: View {
         .onAppear() {
           self.selection = 1
         }
-    }.navigationBarBackButtonHidden(true)
+    }
       .toolbar {
       ToolbarItemGroup(placement: .navigationBarTrailing) {
         Button(action: {

@@ -19,7 +19,6 @@ final class OnTheMapSession: ObservableObject {
     self.userKey = UserDefaults.standard.object(forKey: key) as? String ?? ""
     self.firstName = UserDefaults.standard.object(forKey: firstNameKey) as? String ?? ""
     self.lastName = UserDefaults.standard.object(forKey: lastNameKey) as? String ?? ""
-
   }
   
   static let sharedInstance: OnTheMapSession = OnTheMapSession()

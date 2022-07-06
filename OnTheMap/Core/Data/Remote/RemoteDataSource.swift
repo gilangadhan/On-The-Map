@@ -44,8 +44,11 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
             let decoder = JSONDecoder()
             do {
               let result = try decoder.decode(LocationResponse.self, from: data)
-              if result.data.count > 0, result.data[0].latitude != nil, result.data[0].longitude != nil {
-                  completion(.success(result.data[0]))
+              print(result)
+              if result.data.count == 0 {
+                completion(.failure(URLError.invalidResponse))
+              } else if result.data[0].latitude != nil, result.data[0].longitude != nil {
+                completion(.success(result.data[0]))
               } else {
                 completion(.failure(URLError.invalidResponse))
               }
@@ -57,6 +60,8 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
           }
         }
         task.resume()
+      } else {
+        completion(.failure(URLError.invalidInput))
       }
     }.eraseToAnyPublisher()
   }
@@ -208,7 +213,11 @@ extension RemoteDataSource: RemoteDataSourceProtocol {
           do {
             _ = try decoder.decode(LogoutResponses.self, from: newData)
             DispatchQueue.main.async {
-                completion(self.session.deteleAll() ? .success(true) : .failure(URLError.logoutFailed))
+              self.session.stateLogin = false
+              self.session.userKey = ""
+              self.session.lastName = ""
+              self.session.firstName = ""
+              completion(.success(true))
             }
           } catch {
             completion(.failure(URLError.invalidResponse))
